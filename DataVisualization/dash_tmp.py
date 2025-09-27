@@ -1,17 +1,25 @@
-from dash import Dash, dcc, html
-from plotly import express as px    
-from plotly import graph_objects as go
+import streamlit as st
+import plotly.express as px
 
-data = px.data.iris()
-app = Dash(__name__)
+st.title("Iris Dataset Visualization")
+df = px.data.iris()
 
-app.layout = html.Div(children=[
-    html.H1(children='Iris Data Visualization with Dash'),
-    dcc.Graph(
-        id='iris-scatter',
-        figure=px.scatter(data, x='sepal_width', y='sepal_length', color='species', title='Iris Sepal Dimensions')
+st.dataframe(df.head())
+
+col1, col2 = st.columns(2)
+
+with col1:
+    selected_species = st.multiselect(
+        "Select Species",
+        options=df['species'].unique(),
+        default=df['species'].unique().tolist()
     )
-])
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+with col2:
+    data_amount = st.slider("Number of Data Points", min_value=10, max_value=len(df), value=50)
+
+filtered_df = df[df['species'].isin(selected_species)]
+filtered_df = filtered_df.head(data_amount)
+
+st.scatter_chart(filtered_df, x='sepal_width', y='sepal_length', color='species')
+
